@@ -63,19 +63,19 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12">
-      <div className="cyber-card p-8 sm:p-10 w-full max-w-lg border-cyan-500/30 bg-slate-900/90 shadow-2xl">
+      <div className="cyber-card p-8 sm:p-10 w-full max-w-lg border-cyan-500/30 shadow-2xl">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center mx-auto mb-3 text-cyan-400">
+          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center mx-auto mb-3 text-cyan-600 dark:text-cyan-400">
             <Shield className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Create your account</h1>
-          <p className="text-xs text-slate-400 mt-1 font-mono">
+          <h1 className="text-2xl font-bold text-primary tracking-tight">Create your account</h1>
+          <p className="text-xs text-secondary mt-1 font-mono">
             Deploy secure AI agents with full behavioral testing.
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3 rounded-lg bg-rose-950/50 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+          <div className="mb-6 p-3 rounded-lg bg-rose-500/10 dark:bg-rose-950/50 border border-rose-500/40 text-rose-600 dark:text-rose-300 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -83,97 +83,97 @@ export const RegisterPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
+            <label className="block text-xs font-mono uppercase tracking-wider text-secondary mb-1.5">
               Full Name
             </label>
             <div className="relative">
-              <User className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+              <User className="w-4 h-4 absolute left-3 top-3 text-muted" />
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Agent Security Engineer"
-                className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
+                className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm text-primary placeholder-muted focus:outline-none focus:border-cyan-500 transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
+            <label className="block text-xs font-mono uppercase tracking-wider text-secondary mb-1.5">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+              <Mail className="w-4 h-4 absolute left-3 top-3 text-muted" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="engineer@corp.io"
-                className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
+                className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm text-primary placeholder-muted focus:outline-none focus:border-cyan-500 transition"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-mono uppercase tracking-wider text-secondary mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+                <Lock className="w-4 h-4 absolute left-3 top-3 text-muted" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
+                  className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm text-primary placeholder-muted focus:outline-none focus:border-cyan-500 transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-mono uppercase tracking-wider text-secondary mb-1.5">
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+                <Lock className="w-4 h-4 absolute left-3 top-3 text-muted" />
                 <input
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
+                  className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-lg text-sm text-primary placeholder-muted focus:outline-none focus:border-cyan-500 transition"
                 />
               </div>
             </div>
           </div>
 
           {/* Password Security Complexity Feedback */}
-          <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 text-[11px] font-mono space-y-1">
-            <span className="text-slate-400 block mb-1 font-semibold uppercase text-[10px]">
+          <div className="p-3 bg-surface-muted rounded-lg border border-border text-[11px] font-mono space-y-1">
+            <span className="text-secondary block mb-1 font-semibold uppercase text-[10px]">
               Password Requirements:
             </span>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-              <span className={hasMinLen ? 'text-emerald-400' : 'text-slate-500'}>
+              <span className={hasMinLen ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-muted'}>
                 {hasMinLen ? '✓' : '•'} 8+ characters
               </span>
-              <span className={hasUpper ? 'text-emerald-400' : 'text-slate-500'}>
+              <span className={hasUpper ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-muted'}>
                 {hasUpper ? '✓' : '•'} 1 Uppercase
               </span>
-              <span className={hasLower ? 'text-emerald-400' : 'text-slate-500'}>
+              <span className={hasLower ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-muted'}>
                 {hasLower ? '✓' : '•'} 1 Lowercase
               </span>
-              <span className={hasNumber ? 'text-emerald-400' : 'text-slate-500'}>
+              <span className={hasNumber ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-muted'}>
                 {hasNumber ? '✓' : '•'} 1 Number
               </span>
-              <span className={hasSpecial ? 'text-emerald-400' : 'text-slate-500'}>
+              <span className={hasSpecial ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-muted'}>
                 {hasSpecial ? '✓' : '•'} 1 Special char
               </span>
-              <span className={isMatch ? 'text-emerald-400' : 'text-slate-500'}>
+              <span className={isMatch ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-muted'}>
                 {isMatch ? '✓' : '•'} Passwords match
               </span>
             </div>
@@ -186,29 +186,29 @@ export const RegisterPage: React.FC = () => {
               type="checkbox"
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="mt-1 rounded bg-slate-950 border-slate-700 text-cyan-500 focus:ring-cyan-500"
+              className="mt-1 rounded bg-surface-muted border-border text-cyan-600 focus:ring-cyan-500"
             />
-            <label htmlFor="agree" className="text-xs text-slate-400">
+            <label htmlFor="agree" className="text-xs text-secondary">
               I agree to the{' '}
-              <Link to="/terms" className="text-cyan-400 hover:underline">Terms of Service</Link>{' '}
+              <Link to="/terms" className="text-cyan-600 dark:text-cyan-400 hover:underline">Terms of Service</Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-cyan-400 hover:underline">Privacy Policy</Link>, and acknowledge testing remains within ethical bounds.
+              <Link to="/privacy" className="text-cyan-600 dark:text-cyan-400 hover:underline">Privacy Policy</Link>, and acknowledge testing remains within ethical bounds.
             </label>
           </div>
 
           <button
             type="submit"
             disabled={isLoading || !isPasswordStrong || !isMatch}
-            className="w-full mt-4 py-2.5 px-4 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-40 text-slate-950 font-bold text-sm transition flex items-center justify-center gap-2 shadow-md shadow-cyan-500/20"
+            className="w-full mt-4 py-2.5 px-4 rounded-lg bg-cyan-600 dark:bg-cyan-500 hover:bg-cyan-500 dark:hover:bg-cyan-400 disabled:opacity-40 text-white dark:text-slate-950 font-bold text-sm transition flex items-center justify-center gap-2 shadow-md shadow-cyan-500/20"
           >
             {isLoading ? 'Creating account...' : 'Create Account'}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-400">
+        <div className="mt-6 text-center text-xs text-secondary">
           Already registered?{' '}
-          <Link to="/login" className="text-cyan-400 font-semibold hover:underline">
+          <Link to="/login" className="text-cyan-600 dark:text-cyan-400 font-semibold hover:underline">
             Sign In
           </Link>
         </div>

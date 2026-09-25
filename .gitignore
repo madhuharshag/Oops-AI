@@ -47,3 +47,5 @@ server/data/
 *.sqlite
 *.sqlite3
 *.db
+.vercel
+*.tsbuildinfo

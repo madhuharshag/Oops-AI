@@ -8,7 +8,25 @@ export default {
   theme: {
     extend: {
       colors: {
+        app: 'var(--bg-app)',
+        surface: {
+          DEFAULT: 'var(--bg-surface)',
+          muted: 'var(--bg-surface-muted)',
+          card: 'var(--bg-card)',
+        },
+        border: {
+          DEFAULT: 'var(--border-app)',
+          card: 'var(--border-card)',
+          muted: 'var(--border-muted)',
+        },
+        primary: {
+          DEFAULT: 'var(--text-primary)',
+          foreground: 'var(--text-inverse)',
+        },
+        secondary: 'var(--text-secondary)',
+        muted: 'var(--text-muted)',
         brand: {
+          DEFAULT: 'var(--brand-cyan)',
           50: '#f0fdf4',
           100: '#dcfce7',
           400: '#4ade80',
@@ -24,7 +42,7 @@ export default {
           600: '#30394c',
         },
         cyber: {
-          cyan: '#06b6d4',
+          cyan: 'var(--brand-cyan)',
           crimson: '#f43f5e',
           amber: '#f59e0b',
           emerald: '#10b981',

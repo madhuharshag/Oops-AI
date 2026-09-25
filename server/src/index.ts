@@ -85,7 +85,7 @@ async function startServer() {
   return server;
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   startServer().catch(err => {
     console.error('[Oops! AI Server] Fatal startup failure:', err);
     process.exit(1);

@@ -3,9 +3,19 @@ import { BarChart3, ShieldCheck, ShieldAlert, Database, RefreshCw } from 'lucide
 import { api } from '../services/api';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from 'recharts';
 import { useToast } from '../context/ToastContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const AnalyticsPage: React.FC = () => {
   const { showToast } = useToast();
+  const { effectiveTheme } = useTheme();
+  const isDark = effectiveTheme === 'dark';
+  const chartTextColor = isDark ? '#94a3b8' : '#475569';
+  const chartTooltipBg = isDark ? '#0d1117' : '#ffffff';
+  const chartTooltipBorder = isDark ? '#212836' : '#e2e8f0';
+  const chartTooltipColor = isDark ? '#f8fafc' : '#0f172a';
+  const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+  const lineStroke = isDark ? '#06b6d4' : '#0284c7';
+
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,7 +38,7 @@ export const AnalyticsPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
-        <RefreshCw className="w-8 h-8 animate-spin text-cyan-400" />
+        <RefreshCw className="w-8 h-8 animate-spin text-cyan-600 dark:text-cyan-400" />
       </div>
     );
   }
@@ -49,14 +59,14 @@ export const AnalyticsPage: React.FC = () => {
 
   return (
     <div className="p-6 sm:p-8 space-y-8 max-w-7xl mx-auto">
-      <div className="pb-6 border-b border-slate-800">
-        <span className="text-xs font-mono uppercase tracking-widest text-cyan-400">
+      <div className="pb-6 border-b border-border">
+        <span className="text-xs font-mono uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
           TELEMETRY & INSIGHTS
         </span>
-        <h1 className="text-2xl font-black text-white tracking-tight mt-1">
+        <h1 className="text-2xl font-black text-primary tracking-tight mt-1">
           Security Analytics & Posture
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm text-secondary mt-1">
           Aggregated behavioral metrics, risk levels, and vulnerability trends across simulations.
         </p>
       </div>
@@ -65,8 +75,8 @@ export const AnalyticsPage: React.FC = () => {
         {/* Risk Level Distribution Pie */}
         <div className="cyber-card p-6 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white mb-1">Risk Severity Distribution</h3>
-            <p className="text-xs text-slate-400">Classification breakdown across all test cases</p>
+            <h3 className="text-sm font-bold text-primary mb-1">Risk Severity Distribution</h3>
+            <p className="text-xs text-secondary">Classification breakdown across all test cases</p>
           </div>
 
           <div className="h-56 my-2 flex items-center justify-center">
@@ -86,20 +96,26 @@ export const AnalyticsPage: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ background: '#0d1117', borderColor: '#212836', borderRadius: '8px', fontSize: '12px' }}
+                    contentStyle={{ 
+                      background: chartTooltipBg, 
+                      borderColor: chartTooltipBorder, 
+                      color: chartTooltipColor, 
+                      borderRadius: '8px', 
+                      fontSize: '12px' 
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-xs font-mono text-slate-500">
+              <div className="text-xs font-mono text-muted">
                 Execute attack simulations to view risk breakdown.
               </div>
             )}
           </div>
 
-          <div className="flex justify-around text-xs font-mono pt-3 border-t border-slate-800">
+          <div className="flex justify-around text-xs font-mono pt-3 border-t border-border">
             {riskData.map((r, i) => (
-              <span key={i} className="flex items-center gap-1.5" style={{ color: r.color }}>
+              <span key={i} className="flex items-center gap-1.5 font-semibold" style={{ color: r.color }}>
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: r.color }} />
                 {r.name}: {r.value}
               </span>
@@ -110,8 +126,8 @@ export const AnalyticsPage: React.FC = () => {
         {/* Sensitive Data Category Frequency */}
         <div className="cyber-card p-6 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white mb-1">Sensitive Data Leakage Vector Counts</h3>
-            <p className="text-xs text-slate-400">Total detected sensitive tokens by data classification</p>
+            <h3 className="text-sm font-bold text-primary mb-1">Sensitive Data Leakage Vector Counts</h3>
+            <p className="text-xs text-secondary">Total detected sensitive tokens by data classification</p>
           </div>
 
           <div className="h-56 my-2">
@@ -120,27 +136,33 @@ export const AnalyticsPage: React.FC = () => {
                 <BarChart data={sensitiveEntries} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
                   <XAxis 
                     dataKey="type" 
-                    stroke="#64748b" 
+                    stroke={chartTextColor} 
                     fontSize={10} 
                     interval={0}
                     angle={-20}
                     textAnchor="end"
                   />
-                  <YAxis stroke="#64748b" fontSize={11} />
+                  <YAxis stroke={chartTextColor} fontSize={11} />
                   <Tooltip 
-                    contentStyle={{ background: '#0d1117', borderColor: '#212836', borderRadius: '8px', fontSize: '12px' }}
+                    contentStyle={{ 
+                      background: chartTooltipBg, 
+                      borderColor: chartTooltipBorder, 
+                      color: chartTooltipColor, 
+                      borderRadius: '8px', 
+                      fontSize: '12px' 
+                    }}
                   />
                   <Bar dataKey="count" fill="#f43f5e" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-xs font-mono text-slate-500">
+              <div className="h-full flex items-center justify-center text-xs font-mono text-muted">
                 No sensitive data tokens detected in recent simulations.
               </div>
             )}
           </div>
 
-          <div className="text-[11px] font-mono text-slate-400 text-right">
+          <div className="text-[11px] font-mono text-muted text-right">
             Detection: Regex-based pattern scanner
           </div>
         </div>
@@ -148,31 +170,37 @@ export const AnalyticsPage: React.FC = () => {
 
       {/* Historical Score Trend */}
       <div className="cyber-card p-6">
-        <h3 className="text-sm font-bold text-white mb-1">Simulation Risk Score Trend (Recent 15 Runs)</h3>
-        <p className="text-xs text-slate-400 mb-4">Historical risk fluctuation and defense efficacy</p>
+        <h3 className="text-sm font-bold text-primary mb-1">Simulation Risk Score Trend (Recent 15 Runs)</h3>
+        <p className="text-xs text-secondary mb-4">Historical risk fluctuation and defense efficacy</p>
 
         <div className="h-64">
           {timelineTrends.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={timelineTrends} margin={{ top: 10, right: 20, left: -20, bottom: 10 }}>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
-                <YAxis domain={[0, 100]} stroke="#64748b" fontSize={11} />
+                <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+                <XAxis dataKey="date" stroke={chartTextColor} fontSize={11} />
+                <YAxis domain={[0, 100]} stroke={chartTextColor} fontSize={11} />
                 <Tooltip 
-                  contentStyle={{ background: '#0d1117', borderColor: '#212836', borderRadius: '8px', fontSize: '12px' }}
+                  contentStyle={{ 
+                    background: chartTooltipBg, 
+                    borderColor: chartTooltipBorder, 
+                    color: chartTooltipColor, 
+                    borderRadius: '8px', 
+                    fontSize: '12px' 
+                  }}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="riskScore" 
-                  stroke="#06b6d4" 
+                  stroke={lineStroke} 
                   strokeWidth={2}
-                  dot={{ fill: '#06b6d4', r: 4 }}
+                  dot={{ fill: lineStroke, r: 4 }}
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center text-xs font-mono text-slate-500">
+            <div className="h-full flex items-center justify-center text-xs font-mono text-muted">
               Run simulations to generate score trend lines.
             </div>
           )}

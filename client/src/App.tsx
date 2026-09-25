@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 
@@ -36,7 +37,7 @@ import { SettingsPage } from './pages/SettingsPage';
 
 // Public Layout
 const PublicLayout: React.FC = () => (
-  <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100">
+  <div className="min-h-screen flex flex-col bg-app text-primary transition-colors duration-150">
     <Navbar />
     <main className="flex-1">
       <Outlet />
@@ -47,11 +48,11 @@ const PublicLayout: React.FC = () => (
 
 // Protected Dashboard Layout
 const DashboardLayout: React.FC = () => (
-  <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100">
+  <div className="min-h-screen flex flex-col bg-app text-primary transition-colors duration-150">
     <Navbar />
     <div className="flex-1 flex flex-col md:flex-row">
       <Sidebar />
-      <main className="flex-1 min-w-0 bg-[#07090e] overflow-y-auto">
+      <main className="flex-1 min-w-0 bg-app overflow-y-auto">
         <Outlet />
       </main>
     </div>
@@ -61,8 +62,9 @@ const DashboardLayout: React.FC = () => (
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
           <Routes>
             {/* Public Pages */}
             <Route element={<PublicLayout />}>
@@ -104,7 +106,8 @@ export const App: React.FC = () => {
           </Routes>
         </ToastProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </ThemeProvider>
+  </BrowserRouter>
   );
 };
 

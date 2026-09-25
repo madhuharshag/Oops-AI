@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Break it. Understand it. Fix it. Trust it. Autonomous AI security testing and trust platform for AI agents.",
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "build": "npm run build --prefix server && npm run build --prefix client",
