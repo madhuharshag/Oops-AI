@@ -51,7 +51,14 @@ function getNestedValue(obj: any, path: string): any {
 }
 
 function evaluateCondition(clause: { field: string; operator: string; value: any }, context: EvaluationContext): boolean {
-  const actualValue = getNestedValue(context, clause.field);
+  let field = clause.field;
+  if (field === 'attack_input' || field === 'input' || field === 'prompt') {
+    field = 'payload_text';
+  }
+  let actualValue = getNestedValue(context, field);
+  if (actualValue === undefined && (field === 'payload_text' || field === 'attack_input')) {
+    actualValue = (context as any).payload_text || (context as any).attack_input;
+  }
   const targetValue = clause.value;
 
   switch (clause.operator) {

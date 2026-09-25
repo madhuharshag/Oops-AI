@@ -83,8 +83,9 @@ export async function executeControlledAttack(options: ExecuteAttackOptions): Pr
       available_tools: agent.available_tools,
     },
     attack_type: attackType,
-    payload_text: attackInput
-  };
+    payload_text: attackInput,
+    attack_input: attackInput,
+  } as any;
 
   const policyResult = evaluatePolicies(userPolicies, evalContext);
 
