@@ -44,15 +44,7 @@ export const Navbar: React.FC = () => {
           <Link to="/about" className="text-sm font-medium text-secondary hover:text-cyan-600 dark:hover:text-cyan-400 transition">
             About & Ethics
           </Link>
-          <a
-            href="/api/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-medium text-secondary hover:text-cyan-600 dark:hover:text-cyan-400 transition flex items-center gap-1"
-          >
-            <Terminal className="w-3.5 h-3.5" />
-            API Docs
-          </a>
+          
         </nav>
 
         {/* Right Action Buttons */}
