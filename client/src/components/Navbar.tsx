@@ -70,10 +70,26 @@ export const Navbar: React.FC = () => {
                 Console
               </Link>
               <div className="flex items-center gap-2 pl-2 border-l border-border">
-                <span className="text-xs text-primary font-medium">{user.name}</span>
+                {user.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.name}
+                    className="w-6 h-6 rounded-full border border-border object-cover"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/40 text-[10px] font-bold flex items-center justify-center">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex flex-col text-left">
+                  <span className="text-xs text-primary font-medium leading-none">{user.name}</span>
+                  {user.email && (
+                    <span className="text-[10px] text-muted leading-tight font-mono truncate max-w-[130px]">{user.email}</span>
+                  )}
+                </div>
                 <button
                   onClick={handleLogout}
-                  className="p-1.5 rounded-lg text-secondary hover:text-rose-500 hover:bg-rose-500/10 transition"
+                  className="p-1.5 rounded-lg text-secondary hover:text-rose-500 hover:bg-rose-500/10 transition ml-1"
                   title="Sign out"
                   aria-label="Sign out"
                 >
@@ -155,6 +171,9 @@ export const Navbar: React.FC = () => {
                 >
                   Dashboard ({user.name})
                 </Link>
+                {user.email && (
+                  <div className="text-xs text-muted font-mono px-0.5">{user.email}</div>
+                )}
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);

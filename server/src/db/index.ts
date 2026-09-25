@@ -9,8 +9,9 @@ import bcrypt from 'bcryptjs';
 export interface User {
   id: string;
   email: string;
-  password_hash: string;
+  password_hash?: string | null;
   name: string;
+  avatar_url?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -252,15 +253,24 @@ export const db = {
       return inMemoryDb.users.find(u => u.id === id) || null;
     },
 
-    async create(user: { email: string; password_hash: string; name: string }): Promise<User> {
+    async create(user: { id?: string; email: string; password_hash?: string | null; name: string; avatar_url?: string | null }): Promise<User> {
       const now = new Date().toISOString();
-      const id = crypto.randomUUID();
+      const id = user.id || crypto.randomUUID();
       const normalized = user.email.toLowerCase().trim();
+      const passwordHash = user.password_hash || null;
+      const avatarUrl = user.avatar_url || null;
 
       if (usePostgres && pgPool) {
         const res = await pgPool.query(
-          'INSERT INTO users (id, email, password_hash, name, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-          [id, normalized, user.password_hash, user.name, now, now]
+          `INSERT INTO users (id, email, password_hash, name, avatar_url, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           ON CONFLICT (id) DO UPDATE SET
+             email = EXCLUDED.email,
+             name = COALESCE(EXCLUDED.name, users.name),
+             avatar_url = COALESCE(EXCLUDED.avatar_url, users.avatar_url),
+             updated_at = EXCLUDED.updated_at
+           RETURNING *`,
+          [id, normalized, passwordHash, user.name, avatarUrl, now, now]
         );
         return res.rows[0];
       }
@@ -268,8 +278,9 @@ export const db = {
       const newUser: User = {
         id,
         email: normalized,
-        password_hash: user.password_hash,
+        password_hash: passwordHash,
         name: user.name,
+        avatar_url: avatarUrl,
         created_at: now,
         updated_at: now,
       };

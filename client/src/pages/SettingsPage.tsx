@@ -15,14 +15,28 @@ export const SettingsPage: React.FC = () => {
   const [name, setName] = useState(user?.name || '');
   const [isUpdating, setIsUpdating] = useState(false);
 
+  React.useEffect(() => {
+    if (user?.name) {
+      setName(user.name);
+    }
+  }, [user?.name]);
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanName = name.trim();
+    if (!cleanName) {
+      showToast('Name cannot be empty.', 'error');
+      return;
+    }
     setIsUpdating(true);
     try {
-      // Profile update
-      showToast('Profile updated successfully.', 'success');
-    } catch {
-      showToast('Failed to update profile.', 'error');
+      const res = await api.put('/auth/profile', { name: cleanName });
+      if (res.data?.user) {
+        showToast('Profile updated successfully.', 'success');
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to update profile.';
+      showToast(msg, 'error');
     } finally {
       setIsUpdating(false);
     }

@@ -81,8 +81,8 @@ router.post('/login', authRateLimiter, validateBody(LoginSchema), async (req: Re
     const user = await db.users.findByEmail(email);
 
     // Constant-time check pattern to prevent timing attack and generic error to prevent user enumeration
-    if (!user) {
-      res.status(401).json({ error: 'Invalid email or password.' });
+    if (!user || !user.password_hash) {
+      res.status(401).json({ error: 'Invalid email or password. If you registered with Google, please continue with Google.' });
       return;
     }
 
@@ -160,18 +160,63 @@ router.post('/logout', async (req: Request, res: Response, next: NextFunction) =
 // GET /api/auth/me
 router.get('/me', requireAuth, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const user = await db.users.findById(req.user!.userId);
+    let user = await db.users.findById(req.user!.userId);
+
+    // If not found in public.users, auto-create profile from verified token identity
+    if (!user && req.user) {
+      user = await db.users.create({
+        id: req.user.userId,
+        email: req.user.email,
+        name: req.user.name || 'User',
+      });
+    }
+
     if (!user) {
       res.status(404).json({ error: 'User profile not found.' });
       return;
     }
 
+    const cleanEmail = String(user.email || '').trim().toLowerCase();
+    let cleanName = String(user.name || '').trim().replace(/^["']|["']$/g, '');
+    if (!cleanName || cleanName === 'User') {
+      cleanName = cleanEmail.split('@')[0] || 'User';
+    }
+
     res.json({
       user: {
         id: user.id,
-        email: user.email,
-        name: user.name,
+        email: cleanEmail,
+        name: cleanName,
+        avatar_url: user.avatar_url || null,
         created_at: user.created_at,
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /api/auth/profile
+router.put('/profile', requireAuth, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const rawName = String(req.body.name || '').trim().replace(/^["']|["']$/g, '');
+    if (!rawName) {
+      res.status(400).json({ error: 'Name cannot be empty.' });
+      return;
+    }
+    const updated = await db.users.update(req.user!.userId, { name: rawName });
+    if (!updated) {
+      res.status(404).json({ error: 'User profile not found.' });
+      return;
+    }
+    res.json({
+      message: 'Profile updated successfully.',
+      user: {
+        id: updated.id,
+        email: updated.email,
+        name: updated.name,
+        avatar_url: updated.avatar_url || null,
+        created_at: updated.created_at,
       }
     });
   } catch (err) {

@@ -15,32 +15,94 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function sanitizeProfileString(val: any, fallback: string = ''): string {
+  if (typeof val !== 'string') return fallback;
+  let clean = val.trim();
+  // Remove surrounding quotes if double-stringified
+  clean = clean.replace(/^["']|["']$/g, '').trim();
+  try {
+    if (clean.includes('%')) {
+      clean = decodeURIComponent(clean);
+    }
+  } catch {}
+  return clean || fallback;
+}
+
+function extractCleanUserData(userObj: any, metadata: any): User {
+  const id = sanitizeProfileString(userObj?.id);
+  const rawEmail = userObj?.email || metadata?.email || '';
+  const email = sanitizeProfileString(rawEmail).toLowerCase();
+
+  // Multi-tier priority name extraction
+  let name = sanitizeProfileString(
+    metadata?.full_name ||
+    metadata?.name ||
+    metadata?.user_name ||
+    metadata?.display_name ||
+    userObj?.name ||
+    ''
+  );
+
+  // If no name or placeholder, derive clean display name from email
+  if (!name || name === 'User' || name === 'undefined' || name === 'null') {
+    if (email && email.includes('@')) {
+      const prefix = email.split('@')[0];
+      name = prefix
+        .split(/[._-]/)
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(' ');
+    } else {
+      name = 'Security Operator';
+    }
+  }
+
+  const avatar_url = sanitizeProfileString(
+    metadata?.avatar_url || metadata?.picture || userObj?.avatar_url || ''
+  ) || null;
+
+  return {
+    id,
+    email,
+    name,
+    avatar_url,
+    created_at: userObj?.created_at,
+  };
+}
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const checkAuth = async () => {
     try {
-      // First check Supabase session
+      // 1. Check Supabase OAuth / persistent session first
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token && session.user) {
         setAccessToken(session.access_token);
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-        });
+        const cleanUser = extractCleanUserData(session.user, session.user.user_metadata);
+        setUser(cleanUser);
+
+        // Fetch / sync backend profile in background
+        api.get('/auth/me').then(res => {
+          if (res.data?.user) {
+            setUser(prev => ({
+              ...prev,
+              ...extractCleanUserData(res.data.user, null)
+            }));
+          }
+        }).catch(() => {});
+
         setIsLoading(false);
         return;
       }
 
+      // 2. Check local token for email/password sessions
       const token = getAccessToken();
       if (!token) {
-        // Try silent refresh
         try {
           const { data } = await api.post('/auth/refresh');
           setAccessToken(data.accessToken);
-          setUser(data.user);
+          setUser(extractCleanUserData(data.user, null));
           setIsLoading(false);
           return;
         } catch {
@@ -51,7 +113,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       const { data } = await api.get('/auth/me');
-      setUser(data.user);
+      setUser(extractCleanUserData(data.user, null));
     } catch {
       setUser(null);
       setAccessToken(null);
@@ -65,11 +127,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.access_token && session.user) {
         setAccessToken(session.access_token);
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-        });
+        const cleanUser = extractCleanUserData(session.user, session.user.user_metadata);
+        setUser(cleanUser);
+
+        api.get('/auth/me').then(res => {
+          if (res.data?.user) {
+            setUser(prev => ({
+              ...prev,
+              ...extractCleanUserData(res.data.user, null)
+            }));
+          }
+        }).catch(() => {});
+
         setIsLoading(false);
       }
     });
@@ -84,13 +153,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string) => {
     const { data } = await api.post('/auth/login', { email, password });
     setAccessToken(data.accessToken);
-    setUser(data.user);
+    setUser(extractCleanUserData(data.user, null));
   };
 
   const register = async (name: string, email: string, password: string, confirmPassword: string) => {
     const { data } = await api.post('/auth/register', { name, email, password, confirmPassword });
     setAccessToken(data.accessToken);
-    setUser(data.user);
+    setUser(extractCleanUserData(data.user, null));
   };
 
   const loginWithGoogle = async () => {

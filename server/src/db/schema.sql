@@ -3,12 +3,13 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Users Table
+-- 1. Users Table (Connected with Supabase Auth auth.users)
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255),
     name VARCHAR(255) NOT NULL,
+    avatar_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -128,3 +129,57 @@ BEGIN
         CREATE POLICY public_read_labs ON security_labs FOR SELECT USING (true);
     END IF;
 END $$;
+
+-- Automatic profile sync trigger from Supabase Auth (auth.users)
+CREATE OR REPLACE FUNCTION public.handle_auth_user()
+RETURNS trigger AS $$
+DECLARE
+  extracted_name text;
+  extracted_email text;
+  extracted_avatar text;
+BEGIN
+  extracted_email := LOWER(TRIM(COALESCE(NEW.email, '')));
+  
+  extracted_name := COALESCE(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    NEW.raw_user_meta_data->>'user_name',
+    NULLIF(split_part(extracted_email, '@', 1), ''),
+    'User'
+  );
+
+  extracted_name := TRIM(REGEXP_REPLACE(extracted_name, '^["'']|["'']$', '', 'g'));
+  
+  extracted_avatar := COALESCE(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture',
+    ''
+  );
+
+  INSERT INTO public.users (id, email, name, avatar_url, created_at, updated_at)
+  VALUES (
+    NEW.id,
+    extracted_email,
+    extracted_name,
+    extracted_avatar,
+    COALESCE(NEW.created_at, NOW()),
+    NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    name = CASE 
+      WHEN public.users.name IS NULL OR public.users.name = '' OR public.users.name = 'User' THEN EXCLUDED.name 
+      ELSE public.users.name 
+    END,
+    avatar_url = COALESCE(NULLIF(EXCLUDED.avatar_url, ''), public.users.avatar_url),
+    updated_at = NOW();
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created_or_updated ON auth.users;
+CREATE TRIGGER on_auth_user_created_or_updated
+  AFTER INSERT OR UPDATE ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_auth_user();
+
