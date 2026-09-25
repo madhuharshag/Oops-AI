@@ -180,12 +180,14 @@ export async function initDatabase(): Promise<void> {
   if (config.databaseUrl) {
     try {
       console.log('[DB] Connecting to PostgreSQL at configured DATABASE_URL...');
+      const isSupabase = config.databaseUrl.includes('supabase.co') || config.databaseUrl.includes('pooler.supabase.com');
+      const ssl = (isSupabase || config.isProd) ? { rejectUnauthorized: false } : undefined;
       pgPool = new Pool({
         connectionString: config.databaseUrl,
-        ssl: config.isProd ? { rejectUnauthorized: false } : undefined,
-        max: 10,
+        ssl,
+        max: process.env.VERCEL ? 3 : 10,
         idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 5000,
+        connectionTimeoutMillis: 10000,
       });
 
       const client = await pgPool.connect();

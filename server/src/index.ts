@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { config } from './config';
-import { initDatabase } from './db';
+import { initDatabase, db } from './db';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { apiRateLimiter } from './middleware/rateLimiter';
 
@@ -51,6 +51,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     service: 'Oops! AI Security Engine',
+    database: db.isPostgres() ? 'supabase-postgresql' : 'in-memory-fallback',
     timestamp: new Date().toISOString(),
     environment: config.nodeEnv,
   });
