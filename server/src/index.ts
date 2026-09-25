@@ -14,7 +14,6 @@ import attackRoutes from './routes/attackRoutes';
 import policyRoutes from './routes/policyRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import reportRoutes from './routes/reportRoutes';
-import docRoutes from './routes/docRoutes';
 
 const app = express();
 
@@ -68,7 +67,6 @@ app.use('/api/attacks', attackRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/api/docs', docRoutes);
 
 // 404 & Central Error Handling
 app.use(notFoundHandler);
@@ -80,7 +78,6 @@ async function startServer() {
 
   const server = app.listen(config.port, () => {
     console.log(`[Oops! AI Server] Running on http://localhost:${config.port}`);
-    console.log(`[Oops! AI Server] API Documentation available at http://localhost:${config.port}/api/docs`);
   });
 
   return server;

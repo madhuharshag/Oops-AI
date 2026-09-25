@@ -24,9 +24,6 @@ export const Footer: React.FC = () => {
           <Link to="/about" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition">About & Ethics</Link>
           <Link to="/privacy" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition">Privacy Policy</Link>
           <Link to="/terms" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition">Terms of Service</Link>
-          <a href="/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition">
-            API Documentation
-          </a>
           <a
             href="https://github.com/madhuharshag/Oops-AI"
             target="_blank"

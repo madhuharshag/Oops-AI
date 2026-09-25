@@ -8,9 +8,7 @@ import {
   Scale, 
   BarChart3, 
   FileText, 
-  Settings,
-  HelpCircle,
-  ExternalLink
+  Settings
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -56,20 +54,7 @@ export const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      {/* Quick Docs Link */}
-      <div className="p-4 border-t border-border space-y-2">
-        <a
-          href="/api/docs"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-muted border border-border text-xs text-secondary hover:text-cyan-600 dark:hover:text-cyan-400 transition"
-        >
-          <span className="flex items-center gap-2">
-            <HelpCircle className="w-3.5 h-3.5" />
-            OpenAPI Spec
-          </span>
-          <ExternalLink className="w-3 h-3" />
-        </a>
+      <div className="p-4 border-t border-border">
         <div className="px-3 py-1 text-[11px] text-muted font-mono">
           Oops! AI Engine v2.1
         </div>
