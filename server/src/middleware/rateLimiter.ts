@@ -24,10 +24,13 @@ export function createRateLimiter(options: {
     message = 'Too many requests, please try again later.',
     keyGenerator = (req: Request) => {
       const authReq = req as AuthenticatedRequest;
-      return authReq.user?.userId || req.ip || req.socket.remoteAddress || 'anonymous';
+      const forwarded = req.headers['x-forwarded-for'];
+      const clientIp = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : '') || req.ip || req.socket?.remoteAddress || '';
+      const emailSuffix = req.body?.email ? `:${req.body.email.toLowerCase().trim()}` : '';
+      return `${authReq.user?.userId || clientIp || 'global'}${emailSuffix}`;
     },
     enableLockout = false,
-    lockoutThreshold = 10,
+    lockoutThreshold = 50,
     lockoutDurationMs = 15 * 60 * 1000,
   } = options;
 
@@ -72,10 +75,10 @@ export function createRateLimiter(options: {
 
 export const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 10, // Generous enough for judges and testing
-  message: 'Too many authentication attempts from this IP. Please try again after 15 minutes.',
-  enableLockout: true,
-  lockoutThreshold: 10,
+  max: 100, // Generous enough for judges and testing
+  message: 'Too many authentication attempts. Please try again after 15 minutes.',
+  enableLockout: false,
+  lockoutThreshold: 50,
 });
 
 export const apiRateLimiter = createRateLimiter({
