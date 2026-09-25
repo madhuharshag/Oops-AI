@@ -49,3 +49,4 @@ server/data/
 *.db
 .vercel
 *.tsbuildinfo
+.env
