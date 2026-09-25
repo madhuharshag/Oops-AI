@@ -133,7 +133,9 @@ let inMemoryDb: DBStore = {
   security_reports: [],
 };
 
-const DATA_DIR = path.resolve(__dirname, '../../data');
+const DATA_DIR = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
+  ? '/tmp/oops_ai_data'
+  : path.resolve(__dirname, '../../data');
 const DATA_FILE = path.join(DATA_DIR, 'oops_ai_store.json');
 
 function loadLocalFileStore() {
