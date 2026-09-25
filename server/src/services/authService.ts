@@ -82,6 +82,18 @@ export function verifyAccessToken(token: string): { userId: string; email: strin
     const decoded = jwt.verify(token, config.jwt.secret) as { userId: string; email: string; name: string };
     return decoded;
   } catch {
+    // If not signed with internal secret, check if it's a Supabase Auth JWT
+    try {
+      const decoded = jwt.decode(token) as any;
+      if (decoded && (decoded.iss?.includes('supabase') || decoded.role === 'authenticated' || decoded.aud === 'authenticated')) {
+        const userId = decoded.sub;
+        const email = decoded.email || decoded.user_metadata?.email || '';
+        const name = decoded.user_metadata?.name || decoded.user_metadata?.full_name || email.split('@')[0] || 'User';
+        if (userId) {
+          return { userId, email, name };
+        }
+      }
+    } catch {}
     return null;
   }
 }

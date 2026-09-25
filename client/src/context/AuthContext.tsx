@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api, setAccessToken, getAccessToken } from '../services/api';
+import { supabase } from '../services/supabase';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -7,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, confirmPassword: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
@@ -19,6 +21,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const checkAuth = async () => {
     try {
+      // First check Supabase session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token && session.user) {
+        setAccessToken(session.access_token);
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const token = getAccessToken();
       if (!token) {
         // Try silent refresh
@@ -46,7 +61,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
+    // Listen for Supabase OAuth redirects and session changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.access_token && session.user) {
+        setAccessToken(session.access_token);
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+        });
+        setIsLoading(false);
+      }
+    });
+
     checkAuth();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -61,19 +93,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(data.user);
   };
 
+  const loginWithGoogle = async () => {
+    const origin = window.location.origin;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${origin}/dashboard`,
+      },
+    });
+    if (error) {
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post('/auth/logout');
     } catch (err) {
-      console.warn('Logout error', err);
-    } finally {
-      setAccessToken(null);
-      setUser(null);
+      console.warn('Backend logout error', err);
     }
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('Supabase logout error', err);
+    }
+    setAccessToken(null);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, loginWithGoogle, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

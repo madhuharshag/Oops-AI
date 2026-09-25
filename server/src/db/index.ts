@@ -4,6 +4,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { config } from '../config';
 import { DEFAULT_SECURITY_LABS } from './seedLabs';
+import bcrypt from 'bcryptjs';
 
 export interface User {
   id: string;
@@ -219,6 +220,8 @@ export async function initDatabase(): Promise<void> {
   } else {
     console.log('[DB] No DATABASE_URL set. Running on high-performance built-in persistent storage engine.');
   }
+
+  await seedDemoAccount();
 }
 
 export const db = {
@@ -676,3 +679,51 @@ export const db = {
     }
   }
 };
+
+async function seedDemoAccount(): Promise<void> {
+  try {
+    const demoEmail = 'secops.lead@oops-ai.test';
+    const existingUser = await db.users.findByEmail(demoEmail);
+    if (!existingUser) {
+      const passwordHash = await bcrypt.hash('CyberSecure99!', 10);
+      const user = await db.users.create({
+        email: demoEmail,
+        password_hash: passwordHash,
+        name: 'SecOps Lead',
+      });
+      console.log(`[DB] Created default SecOps demo user: ${demoEmail}`);
+
+      // Create default agent for this user
+      const agent = await db.agents.create({
+        user_id: user.id,
+        name: 'Sentinel Prime',
+        description: 'High-assurance production agent evaluating transactions and querying user databases.',
+        purpose: 'Enterprise Autonomous Financial Agent with SQL & Database Access',
+        risk_level: 'critical',
+        capabilities: ['execute_query', 'customer_lookup', 'refund_process', 'audit_log'],
+        accessible_resources: ['customer_db', 'payment_gateway', 's3_audit_vault'],
+        available_tools: ['sql_runner', 'http_requester', 'file_reader'],
+        data_sensitivity: 'restricted',
+        status: 'active',
+      });
+      console.log(`[DB] Created default agent Sentinel Prime (${agent.id}) for demo user.`);
+
+      // Create default policy for this user
+      await db.policies.create({
+        user_id: user.id,
+        name: 'Block Unauthorized SQL Execution',
+        description: 'Prevent prompt injection payloads attempting to execute destructive SQL queries.',
+        priority: 90,
+        active: true,
+        conditions: [
+          { field: 'attack_input', operator: 'contains', value: 'DROP TABLE' },
+          { field: 'attack_input', operator: 'contains', value: 'SELECT * FROM users' },
+        ],
+        actions: [{ type: 'block', reason: 'High-risk SQL statement detected' }],
+      });
+    }
+  } catch (err) {
+    console.warn('[DB] Demo account seeding error (non-fatal):', err);
+  }
+}
+

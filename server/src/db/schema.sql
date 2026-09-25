@@ -47,7 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_agents_user_id ON agents(user_id);
 
 -- 4. Security Labs (Pre-populated baseline labs)
 CREATE TABLE IF NOT EXISTS security_labs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id VARCHAR(100) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     threat_type VARCHAR(100) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS attacks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     agent_id UUID NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
-    lab_id UUID REFERENCES security_labs(id) ON DELETE SET NULL,
+    lab_id VARCHAR(100) REFERENCES security_labs(id) ON DELETE SET NULL,
     attack_type VARCHAR(100) NOT NULL,
     attack_input TEXT NOT NULL,
     target_resource VARCHAR(255) NOT NULL,
